@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>UMAG Kazakhstan</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap');
+:root{--blue:#0066CC;--blue-light:#E8F1FB;--gold:#F5A623;--dark:#0D1B2A;--gray:#6B7280;--gray-light:#F3F4F6;--border:#E5E7EB;--white:#FFFFFF;--green:#16A34A;--red:#DC2626;--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Golos Text',sans-serif;background:var(--gray-light);color:var(--dark);font-size:14px;min-height:100vh;padding-bottom:80px}
+.header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:white;font-size:18px}
+.logo-text{font-size:16px;font-weight:700;color:var(--dark)}
+.logo-sub{font-size:10px;color:var(--gray)}
+.lang-toggle{display:flex;background:var(--gray-light);border-radius:20px;padding:2px;gap:2px}
+.lang-btn{padding:4px 10px;border-radius:18px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--gray);font-family:'Golos Text',sans-serif;transition:all 0.2s}
+.lang-btn.active{background:var(--white);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.search-wrap{padding:8px 16px 12px}
+.search-input{width:100%;background:var(--gray-light);border:1.5px solid transparent;border-radius:10px;padding:9px 14px 9px 38px;font-size:14px;font-family:'Golos Text',sans-serif;color:var(--dark);outline:none;transition:border-color 0.2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%236B7280' stroke-width='2'/%3E%3Cpath d='M16.5 16.5L21 21' stroke='%236B7280' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.search-input:focus{border-color:var(--blue)}
+.search-input::placeholder{color:var(--gray)}
+.cats{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat-chip{display:flex;align-items:center;gap:5px;white-space:nowrap;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:500;color:var(--gray);cursor:pointer;font-family:'Golos Text',sans-serif;transition:all 0.15s}
+.cat-chip.active{background:var(--blue);border-color:var(--blue);color:white}
+.banner{margin:0 16px 16px;background:linear-gradient(135deg,var(--blue) 0%,#004A99 100%);border-radius:var(--radius);padding:16px;color:white;position:relative;overflow:hidden}
+.banner::after{content:'🖥️';position:absolute;right:16px;bottom:-4px;font-size:52px;opacity:0.25}
+.banner-tag{display:inline-block;background:var(--gold);color:var(--dark);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:6px}
+.banner-title{font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.3}
+.banner-sub{font-size:12px;opacity:0.8}
+.banner-kaspi{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border-radius:8px;padding:4px 10px;margin-top:8px;font-size:11px;font-weight:600}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px}
+.section-title{font-size:15px;font-weight:700}
+.section-count{font-size:12px;color:var(--gray)}
+.products{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.product-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform 0.1s;position:relative}
+.product-card:active{transform:scale(0.97)}
+.product-badge{position:absolute;top:8px;left:8px;z-index:2;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px}
+.badge-hit{background:var(--gold);color:var(--dark)}
+.badge-new{background:var(--blue);color:white}
+.badge-sale{background:var(--red);color:white}
+.badge-ref{background:#6B7280;color:white}
+.badge-kaspi{background:#e8082b;color:white}
+.product-img{height:100px;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:40px}
+.product-body{padding:10px}
+.product-cat{font-size:10px;color:var(--gray);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px}
+.product-name{font-size:12px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px}
+.product-prices{display:flex;align-items:baseline;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.price-main{font-size:13px;font-weight:700;color:var(--blue)}
+.price-old{font-size:11px;color:var(--gray);text-decoration:line-through}
+.order-btn{width:100%;background:var(--blue-light);color:var(--blue);border:none;border-radius:var(--radius-sm);padding:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Golos Text',sans-serif}
+.order-btn:active{background:var(--blue);color:white}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);display:flex;z-index:200}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 12px;cursor:pointer;border:none;background:transparent;font-family:'Golos Text',sans-serif;color:var(--gray);transition:color 0.15s}
+.nav-item.active{color:var(--blue)}
+.nav-icon{font-size:20px}
+.nav-label{font-size:10px;font-weight:500}
+.view{display:none}
+.view.active{display:block}
+.detail-img{height:200px;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:72px}
+.detail-body{padding:16px}
+.detail-cat{font-size:11px;color:var(--blue);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.detail-name{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:8px}
+.detail-prices{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.detail-price-main{font-size:22px;font-weight:700;color:var(--blue)}
+.detail-price-old{font-size:14px;color:var(--gray);text-decoration:line-through}
+.kaspi-pill{display:inline-flex;align-items:center;gap:4px;background:#fff0f2;color:#e8082b;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;margin-bottom:12px}
+.detail-desc{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:14px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.specs-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.spec-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.spec-row:last-child{border-bottom:none}
+.spec-key{color:var(--gray);flex:1}
+.spec-val{font-weight:500;text-align:right;flex:1}
+.detail-order-btn{width:100%;background:var(--blue);color:white;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Golos Text',sans-serif;margin-top:16px}
+.back-btn{display:flex;align-items:center;gap:6px;padding:12px 16px 4px;background:none;border:none;color:var(--blue);font-size:14px;font-weight:500;cursor:pointer;font-family:'Golos Text',sans-serif}
+.form-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:20px 16px;margin:16px}
+.form-mini{display:flex;align-items:center;gap:12px;padding:12px;background:var(--blue-light);border-radius:var(--radius-sm);margin-bottom:20px}
+.form-mini-emoji{font-size:28px}
+.form-mini-name{font-size:13px;font-weight:600}
+.form-mini-price{font-size:12px;color:var(--blue);font-weight:600}
+.form-label{display:block;font-size:12px;font-weight:600;margin-bottom:6px}
+.form-input,.form-textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:'Golos Text',sans-serif;color:var(--dark);outline:none;margin-bottom:14px;transition:border-color 0.2s;background:var(--white)}
+.form-input:focus,.form-textarea:focus{border-color:var(--blue)}
+.form-textarea{resize:none;height:80px}
+.form-input::placeholder,.form-textarea::placeholder{color:#aaa}
+.submit-btn{width:100%;background:var(--blue);color:white;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Golos Text',sans-serif}
+.success-view{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:32px;text-align:center}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--gray);line-height:1.5;margin-bottom:24px}
+.back-home-btn{background:var(--blue);color:white;border:none;border-radius:var(--radius);padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Golos Text',sans-serif}
+.about-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin:16px}
+.about-title{font-size:15px;font-weight:700;margin-bottom:10px}
+.about-text{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:14px}
+.contact-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.contact-row:last-child{border-bottom:none}
+.contact-icon{font-size:18px;width:24px;text-align:center}
+.contact-val{color:var(--blue);font-weight:500}
+.tariff-section{margin:0 16px 16px}
+.tariff-title{font-size:15px;font-weight:700;margin-bottom:10px}
+.tariff-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:14px;margin-bottom:10px}
+.tariff-name{font-size:14px;font-weight:700;color:var(--blue);margin-bottom:4px}
+.tariff-desc{font-size:12px;color:var(--gray);margin-bottom:10px}
+.tariff-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+.tariff-row:last-child{border-bottom:none}
+.tariff-period{color:var(--gray)}
+.tariff-price{font-weight:600}
+.tariff-save{font-size:11px;color:var(--green);font-weight:600}
+.page-pad{padding-top:8px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray);font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">🖥️</div>
+      <div><div class="logo-text">UMAG</div><div class="logo-sub">Kazakhstan</div></div>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('ru')">РУС</button>
+      <button class="lang-btn" onclick="setLang('kz')">ҚАЗ</button>
+    </div>
+  </div>
+  <div class="search-wrap" id="searchWrap">
+    <input class="search-input" id="searchInput" placeholder="Поиск оборудования..." oninput="doSearch()">
+  </div>
+  <div class="cats" id="catsWrap">
+    <button class="cat-chip active" onclick="setCat('all',this)">📦 Все</button>
+    <button class="cat-chip" onclick="setCat('pos',this)">🖥️ POS</button>
+    <button class="cat-chip" onclick="setCat('scanner',this)">📡 Сканеры</button>
+    <button class="cat-chip" onclick="setCat('printer',this)">🧾 Принтеры чеков</button>
+    <button class="cat-chip" onclick="setCat('label',this)">🏷️ Принтеры этикеток</button>
+    <button class="cat-chip" onclick="setCat('scales',this)">⚖️ Весы</button>
+    <button class="cat-chip" onclick="setCat('cash',this)">💰 Денежный ящик</button>
+    <button class="cat-chip" onclick="setCat('tsd',this)">📱 ТСД</button>
+    <button class="cat-chip" onclick="setCat('consumables',this)">🗒️ Расходники</button>
+  </div>
+</div>
+
+<div class="view active" id="viewMain">
+  <div class="page-pad">
+    <div class="banner">
+      <div class="banner-tag" id="bannerTag">РАССРОЧКА 0-0-12 / 0-0-24</div>
+      <div class="banner-title" id="bannerTitle">Кассовое оборудование для бизнеса в Казахстане</div>
+      <div class="banner-sub" id="bannerSub">Доставка по всему Казахстану • Установка • Обучение</div>
+      <div class="banner-kaspi">🔴 Kaspi рассрочка</div>
+    </div>
+    <div class="section-header">
+      <div class="section-title" id="lblCatalog">Каталог</div>
+      <div class="section-count" id="productCount"></div>
+    </div>
+    <div class="products" id="productsGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">🔍</div>
+      <div id="lblEmpty">Ничего не найдено</div>
+    </div>
+  </div>
+</div>
+
+<div class="view" id="viewDetail">
+  <button class="back-btn" onclick="showView('viewMain')" id="lblBack1">← Назад</button>
+  <div class="detail-img" id="dEmoji"></div>
+  <div class="detail-body">
+    <div class="detail-cat" id="dCat"></div>
+    <div class="detail-name" id="dName"></div>
+    <div class="detail-prices">
+      <span class="detail-price-main" id="dPrice"></span>
+      <span class="detail-price-old" id="dOld"></span>
+    </div>
+    <div class="kaspi-pill">🔴 Kaspi рассрочка 0-0-12, 0-0-24</div>
+    <div class="detail-desc" id="dDesc"></div>
+    <div class="divider"></div>
+    <div class="specs-title" id="lblSpecs">Характеристики</div>
+    <div id="dSpecs"></div>
+    <button class="detail-order-btn" onclick="openForm()" id="lblOrderBtn">Оставить заявку</button>
+  </div>
+</div>
+
+<div class="view" id="viewForm">
+  <button class="back-btn" onclick="showView('viewDetail')" id="lblBack2">← К товару</button>
+  <div class="form-card">
+    <div class="form-mini" id="formMini"></div>
+    <label class="form-label" id="lblName">Ваше имя *</label>
+    <input class="form-input" id="fName" placeholder="Иван Иванов" type="text">
+    <label class="form-label" id="lblPhone">Телефон *</label>
+    <input class="form-input" id="fPhone" placeholder="+7 (___) ___-__-__" type="tel">
+    <label class="form-label" id="lblComment">Комментарий</label>
+    <textarea class="form-textarea" id="fComment" placeholder="Вопросы, количество, адрес..."></textarea>
+    <button class="submit-btn" onclick="submitForm()" id="lblSubmit">Отправить заявку</button>
+  </div>
+</div>
+
+<div class="view" id="viewSuccess">
+  <div class="success-view">
+    <div class="success-icon">✅</div>
+    <div class="success-title" id="lblSuccessTitle">Заявка отправлена!</div>
+    <div class="success-sub" id="lblSuccessSub">Наш менеджер свяжется с вами в течение 30 минут</div>
+    <button class="back-home-btn" onclick="goHome()" id="lblGoHome">Вернуться в каталог</button>
+  </div>
+</div>
+
+<div class="view" id="viewAbout">
+  <div style="padding-top:8px">
+    <div class="about-card">
+      <div class="about-title">UMAG Kazakhstan</div>
+      <div class="about-text" id="lblAboutText">Профессиональное кассовое оборудование для бизнеса любого масштаба. Установка программы — 30 000 тг (настройка оборудования, обучение персонала, техническая поддержка). Рассрочка через Kaspi 0-0-12 и 0-0-24.</div>
+      <div class="contact-row"><span class="contact-icon">🌐</span><span class="contact-val">umagkazakhstan.kz</span></div>
+      <div class="contact-row"><span class="contact-icon">📍</span><span id="lblAddress">ул. Бейбітшілік 24А</span></div>
+      <div class="contact-row"><span class="contact-icon">🔴</span><span class="contact-val">Kaspi: 0-0-12, 0-0-24</span></div>
+      <div class="contact-row"><span class="contact-icon">🛠️</span><span id="lblInstall">Установка программы — 30 000 тг</span></div>
+    </div>
+    <div class="tariff-section">
+      <div class="tariff-title">Тарифы Umag</div>
+      <div class="tariff-card">
+        <div class="tariff-name">Start</div>
+        <div class="tariff-desc" id="lblStartDesc">Для растущих магазинов</div>
+        <div class="tariff-row"><span class="tariff-period" id="lblMonth1">1 месяц</span><span class="tariff-price">6 900 тг</span></div>
+      </div>
+      <div class="tariff-card">
+        <div class="tariff-name">Standart</div>
+        <div class="tariff-desc" id="lblStdDesc">Полная автоматизация магазина</div>
+        <div class="tariff-row"><span class="tariff-period" id="lblMonth2">1 месяц</span><span class="tariff-price">19 900 тг</span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblMonth3">3 месяца</span><span><span class="tariff-price">47 700 тг</span> <span class="tariff-save" id="lblSave1">Сэкономь 20%</span></span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblMonth6">6 месяцев</span><span><span class="tariff-price">89 400 тг</span> <span class="tariff-save" id="lblSave2">Сэкономь 25%</span></span></div>
+      </div>
+      <div class="tariff-title" style="margin-top:16px">Тарифы UNO</div>
+      <div class="tariff-card">
+        <div class="tariff-name">UNO (Уно)</div>
+        <div class="tariff-desc" id="lblUnoDesc">Система для ресторанов и кафе</div>
+        <div class="tariff-row"><span class="tariff-period">Станция (Front Office)</span><span class="tariff-price">72 000 тг</span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblWarehouse">Склад</span><span class="tariff-price">36 000 тг</span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblCalc">Калькуляция</span><span class="tariff-price">72 000 тг</span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblTarif">Тарификация</span><span class="tariff-price">36 000 тг</span></div>
+        <div class="tariff-row"><span class="tariff-period" id="lblWaiter">Мобильный официант</span><span class="tariff-price">15 000 тг</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-item active" id="navCat" onclick="navTo('viewMain','navCat')">
+    <span class="nav-icon">📦</span><span class="nav-label" id="lblNavCat">Каталог</span>
+  </button>
+  <button class="nav-item" id="navAbout" onclick="navTo('viewAbout','navAbout')">
+    <span class="nav-icon">🏢</span><span class="nav-label" id="lblNavAbout">О нас</span>
+  </button>
+</div>
+
+<script>
+if(window.Telegram&&window.Telegram.WebApp){window.Telegram.WebApp.ready();window.Telegram.WebApp.expand();}
+
+var lang='ru',cat='all',curProduct=null,q='';
+
+var catLabel={ru:{pos:'POS-моноблоки',scanner:'Сканеры',printer:'Принтеры чеков',label:'Принтеры этикеток',scales:'Весы',cash:'Денежный ящик',tsd:'ТСД',consumables:'Расходники'},kz:{pos:'POS-моноблоктар',scanner:'Сканерлер',printer:'Чек принтерлері',label:'Жапсырма принтерлері',scales:'Таразылар',cash:'Ақша жәшігі',tsd:'ТСД',consumables:'Шығыс материалдар'}};
+
+var products=[
+  {id:1,cat:'pos',e:'🖥️',b:'hit',n:{ru:'POS Моноблок UMAG U200 Чёрный/Белый',kz:'POS Моноблок UMAG U200 Қара/Ақ'},p:'149 000 тг',o:'',d:{ru:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, монитор 15", встроенный Wi-Fi.',kz:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, 15" монитор, кіріктірілген Wi-Fi.'},s:[['Процессор','Core i5-4200U'],['ОЗУ','4 Гб DDR4'],['Накопитель','SSD 64 Гб'],['Монитор','15"'],['Wi-Fi','Встроенный']]},
+  {id:2,cat:'pos',e:'🖥️',b:'',n:{ru:'POS Моноблок UMAG UK-6 Белый',kz:'POS Моноблок UMAG UK-6 Ақ'},p:'200 000 тг',o:'',d:{ru:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, монитор 15" ёмкостный TFT LCD Touch (1024×768), встроенный Wi-Fi.',kz:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, 15" сенсорлы монитор, Wi-Fi.'},s:[['Процессор','Core i5-4200U'],['ОЗУ','4 Гб DDR4'],['Накопитель','SSD 64 Гб'],['Монитор','15" Touch']]},
+  {id:3,cat:'pos',e:'🖥️',b:'',n:{ru:'POS Моноблок UMAG U120 Широкий экран',kz:'POS Моноблок UMAG U120 Кең экран'},p:'175 000 тг',o:'',d:{ru:'Core i5-4200U, 8 Гб DDR4, SSD 128 Гб, монитор 18", встроенный Wi-Fi.',kz:'Core i5-4200U, 8 Гб DDR4, SSD 128 Гб, 18" монитор, Wi-Fi.'},s:[['Процессор','Core i5-4200U'],['ОЗУ','8 Гб DDR4'],['Накопитель','SSD 128 Гб'],['Монитор','18"']]},
+  {id:4,cat:'pos',e:'🖥️',b:'',n:{ru:'POS Моноблок U200T Двусторонний экран',kz:'POS Моноблок U200T Екі жақты экран'},p:'185 000 тг',o:'',d:{ru:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, два монитора 15"+15", встроенный Wi-Fi.',kz:'Core i5-4200U, 4 Гб DDR4, SSD 64 Гб, 15"+15" мониторлар, Wi-Fi.'},s:[['Процессор','Core i5-4200U'],['ОЗУ','4 Гб DDR4'],['Накопитель','SSD 64 Гб'],['Экраны','15" + 15"']]},
+  {id:5,cat:'pos',e:'🖥️',b:'',n:{ru:'POS Моноблок 630',kz:'POS Моноблок 630'},p:'125 000 тг',o:'',d:{ru:'Intel J1800 2.4 GHz Dual Core, 4 Гб DDR4, SSD 64 Гб, монитор 15".',kz:'Intel J1800 2.4 GHz, 4 Гб DDR4, SSD 64 Гб, 15" монитор.'},s:[['Процессор','Intel J1800 2.4 GHz'],['ОЗУ','4 Гб DDR4'],['Накопитель','SSD 64 Гб'],['Монитор','15"']]},
+  {id:6,cat:'pos',e:'🖥️',b:'ref',n:{ru:'REF Уценка моноблоки Umag',kz:'REF Бағасы төмендетілген моноблоктар'},p:'95 000 тг',o:'',d:{ru:'Экран резистивный, 4 Гб DDR4, SSD 64 Гб, монитор 15", Wi-Fi. Уценённые модели.',kz:'Резистивті экран, 4 Гб DDR4, SSD 64 Гб, 15" монитор, Wi-Fi.'},s:[['Экран','Резистивный'],['ОЗУ','4 Гб DDR4'],['Накопитель','SSD 64 Гб'],['Монитор','15"']]},
+  {id:7,cat:'pos',e:'🔌',b:'',n:{ru:'Блок питания для POS моноблока',kz:'POS моноблогына қуат блогы'},p:'10 000 тг',o:'',d:{ru:'Блок питания для POS моноблоков UMAG.',kz:'UMAG POS моноблоктарына арналған қуат блогы.'},s:[['Совместимость','UMAG POS']]},
+  {id:8,cat:'pos',e:'📲',b:'',n:{ru:'Прайс-чекер ZEBRA',kz:'Прайс-чекер ZEBRA'},p:'300 000 тг',o:'',d:{ru:'Проверка цены товара в магазине. Android 10, 4 Гб, USB/Ethernet.',kz:'Дүкенде тауар бағасын тексеру. Android 10, 4 Гб, USB/Ethernet.'},s:[['ОС','Android 10'],['Память','4 Гб'],['Интерфейс','USB, Ethernet']]},
+  {id:9,cat:'scanner',e:'📡',b:'',n:{ru:'Сканер Mertech SUNMI Ns021',kz:'Сканер Mertech SUNMI Ns021'},p:'32 000 тг',o:'',d:{ru:'Автоматический/ручной. Считывает 1D, 2D, DataMatrix, QR.',kz:'Автоматты/қолмен. 1D, 2D, DataMatrix, QR оқиды.'},s:[['Режим','Авто / ручной'],['Коды','1D, 2D, DataMatrix, QR']]},
+  {id:10,cat:'scanner',e:'📡',b:'hit',n:{ru:'Сканер Zebra DS2208 с подставкой',kz:'Сканер Zebra DS2208 тұғырмен'},p:'50 000 тг',o:'',d:{ru:'Автоматический/ручной. 1D, 2D, DataMatrix, QR. В комплекте подставка.',kz:'Автоматты/қолмен. 1D, 2D, DataMatrix, QR. Тұғырмен жинақта.'},s:[['Режим','Авто / ручной'],['Коды','1D, 2D, DataMatrix, QR'],['Подставка','В комплекте']]},
+  {id:11,cat:'scanner',e:'📡',b:'',n:{ru:'Сканер Zebra DS2208 без подставки',kz:'Сканер Zebra DS2208 тұғырсыз'},p:'42 000 тг',o:'',d:{ru:'Автоматический/ручной. 1D, 2D, DataMatrix, QR.',kz:'Автоматты/қолмен. 1D, 2D, DataMatrix, QR.'},s:[['Режим','Авто / ручной'],['Коды','1D, 2D, DataMatrix, QR']]},
+  {id:12,cat:'scanner',e:'📡',b:'',n:{ru:'Стационарный AT6300 USB',kz:'Стационарлық AT6300 USB'},p:'28 000 тг',o:'',d:{ru:'Лазерный всенаправленный. 1650 скан/сек. 1D, 2D, DataMatrix, QR.',kz:'Лазерлік бағытсыз. 1650 скан/сек. 1D, 2D, DataMatrix, QR.'},s:[['Тип','Лазерный, всенаправленный'],['Скорость','1650 скан/сек'],['Интерфейс','USB']]},
+  {id:13,cat:'scanner',e:'📡',b:'',n:{ru:'Стационарный Honeywell HF680',kz:'Стационарлық Honeywell HF680'},p:'70 000 тг',o:'',d:{ru:'Одноплоскостной горизонтальный. 1D, PDF, 2D.',kz:'Бір жазықтықты көлденең. 1D, PDF, 2D.'},s:[['Тип','Одноплоскостной'],['Коды','1D, PDF, 2D']]},
+  {id:14,cat:'scanner',e:'📡',b:'',n:{ru:'Сканер Castom 2D',kz:'Сканер Castom 2D'},p:'18 000 тг',o:'',d:{ru:'Проводной и беспроводной. 1D, 2D, DataMatrix, QR.',kz:'Сымды және сымсыз. 1D, 2D, DataMatrix, QR.'},s:[['Тип','Проводной / беспроводной'],['Коды','1D, 2D, DataMatrix, QR']]},
+  {id:15,cat:'printer',e:'🧾',b:'',n:{ru:'Принтер чеков Xprinter 57мм USB',kz:'Чек принтері Xprinter 57мм USB'},p:'12 000 тг',o:'',d:{ru:'Термопечать. Отрыв ручной. USB.',kz:'Термо. Таспаны қолмен үзу. USB.'},s:[['Ширина','57 мм'],['Отрыв','Ручной'],['Интерфейс','USB']]},
+  {id:16,cat:'printer',e:'🧾',b:'',n:{ru:'Принтер чеков Xprinter 57мм Bluetooth',kz:'Чек принтері Xprinter 57мм Bluetooth'},p:'18 000 тг',o:'',d:{ru:'Термопечать. Отрыв ручной. USB + Bluetooth.',kz:'Термо. Таспаны қолмен үзу. USB + Bluetooth.'},s:[['Ширина','57 мм'],['Отрыв','Ручной'],['Интерфейс','USB + Bluetooth']]},
+  {id:17,cat:'printer',e:'🧾',b:'hit',n:{ru:'Принтер чеков Xprinter 80мм USB/LAN',kz:'Чек принтері Xprinter 80мм USB/LAN'},p:'27 000 тг',o:'',d:{ru:'Термопечать. Отрыв автоматический. USB + LAN.',kz:'Термо. Автоматты үзу. USB + LAN.'},s:[['Ширина','80 мм'],['Отрыв','Автоматический'],['Интерфейс','USB + LAN']]},
+  {id:18,cat:'printer',e:'🧾',b:'',n:{ru:'Принтер чеков Xprinter 80мм LAN',kz:'Чек принтері Xprinter 80мм LAN'},p:'29 000 тг',o:'',d:{ru:'Термопечать. Отрыв автоматический. LAN.',kz:'Термо. Автоматты үзу. LAN.'},s:[['Ширина','80 мм'],['Отрыв','Автоматический'],['Интерфейс','LAN']]},
+  {id:19,cat:'printer',e:'🧾',b:'',n:{ru:'Чековый принтер Castom USB/LAN 80мм',kz:'Castom чек принтері USB/LAN 80мм'},p:'37 000 тг',o:'',d:{ru:'Термо. Для кухни. Звуковое уведомление о чеке.',kz:'Термо. Асүй үшін. Дыбыстық хабарлама.'},s:[['Ширина','80 мм'],['Интерфейс','USB + LAN'],['Звук','Да']]},
+  {id:20,cat:'printer',e:'📱',b:'',n:{ru:'Мобильный принтер 58мм Bluetooth',kz:'Мобильді принтер 58мм Bluetooth'},p:'23 000 тг',o:'',d:{ru:'Работает с мобильным телефоном. 58 мм, Bluetooth.',kz:'Мобильді телефонмен жұмыс. 58 мм, Bluetooth.'},s:[['Ширина','58 мм'],['Подключение','Bluetooth']]},
+  {id:21,cat:'printer',e:'📱',b:'',n:{ru:'Мобильный принтер 80мм Bluetooth',kz:'Мобильді принтер 80мм Bluetooth'},p:'30 000 тг',o:'',d:{ru:'Работает с мобильным телефоном. 80 мм, Bluetooth.',kz:'Мобильді телефонмен жұмыс. 80 мм, Bluetooth.'},s:[['Ширина','80 мм'],['Подключение','Bluetooth']]},
+  {id:22,cat:'label',e:'🏷️',b:'',n:{ru:'Принтер этикеток UMAG T371U',kz:'Жапсырма принтері UMAG T371U'},p:'27 000 тг',o:'',d:{ru:'Термопечать. Форматы: 30/20, 43/25, 58/30-40 мм.',kz:'Термо. Форматтар: 30/20, 43/25, 58/30-40 мм.'},s:[['Тип','Термо'],['Форматы','30/20, 43/25, 58/30-40 мм']]},
+  {id:23,cat:'label',e:'🏷️',b:'kaspi',n:{ru:'Принтер этикеток Xprinter XP-460B',kz:'Жапсырма принтері Xprinter XP-460B'},p:'38 000 тг',o:'',d:{ru:'Для любых размеров этикеток от 20 до 120 мм. Доступен в Kaspi.',kz:'20-дан 120 мм-ге дейін. Kaspi-да қол жетімді.'},s:[['Тип','Термо'],['Ширина этикетки','20–120 мм']]},
+  {id:24,cat:'label',e:'🏷️',b:'',n:{ru:'Принтер этикеток Rongta RP80VI',kz:'Жапсырма принтері Rongta RP80VI'},p:'44 000 тг',o:'',d:{ru:'Термо. Форматы: 30/20, 43/25, 58/30-40 мм. Скорость 150 мм/сек.',kz:'Термо. Форматтар: 30/20, 43/25, 58/30-40 мм. Жылдамдық 150 мм/сек.'},s:[['Тип','Термо'],['Скорость','150 мм/сек'],['Форматы','30/20, 43/25, 58/30-40 мм']]},
+  {id:25,cat:'scales',e:'⚖️',b:'',n:{ru:'Весы Umag (до 30 кг)',kz:'Umag таразысы (30 кг дейін)'},p:'165 000 тг',o:'',d:{ru:'Ш 42 × Д 48 см. Мин. вес 10 г, макс. 30 кг.',kz:'Е 42 × Ұ 48 см. Мин. 10 г, макс. 30 кг.'},s:[['Макс. вес','30 кг'],['Мин. вес','10 г'],['Размер','42×48 см']]},
+  {id:26,cat:'scales',e:'⚖️',b:'',n:{ru:'Весы Umag (старшая модель)',kz:'Umag таразысы (жоғарғы модель)'},p:'175 000 тг',o:'',d:{ru:'Торговые весы с принтером этикеток. Ш 42 × Д 48 см.',kz:'Жапсырма принтері бар сауда таразысы. Е 42 × Ұ 48 см.'},s:[['Макс. вес','30 кг'],['Размер','42×48 см']]},
+  {id:27,cat:'cash',e:'💰',b:'',n:{ru:'Денежный ящик Чёрный/Белый',kz:'Ақша жәшігі Қара/Ақ'},p:'20 000 тг',o:'',d:{ru:'5 отделений для купюр, 5 для монет. Ш 41 × Д 42.5 × В 10.5 см.',kz:'Банкнот үшін 5, монета үшін 5 бөлім. Е 41 × Ұ 42.5 × Б 10.5 см.'},s:[['Купюры','5 отделений'],['Монеты','5 отделений'],['Размер','41×42.5×10.5 см']]},
+  {id:28,cat:'tsd',e:'📱',b:'',n:{ru:'ТСД Caribe PL-70L',kz:'ТСД Caribe PL-70L'},p:'185 000 тг',o:'',d:{ru:'Мини-компьютер со встроенным сканером. Android 11, 4/64 Гб.',kz:'Кіріктірілген сканері бар мини-компьютер. Android 11, 4/64 Гб.'},s:[['ОС','Android 11'],['Память','4 Гб / 64 Гб'],['Сканер','Встроенный']]},
+  {id:29,cat:'tsd',e:'📱',b:'',n:{ru:'ТСД Caribe PL-60L',kz:'ТСД Caribe PL-60L'},p:'200 000 тг',o:'',d:{ru:'Мини-компьютер со встроенным сканером. Android 10, 4 Гб.',kz:'Кіріктірілген сканері бар мини-компьютер. Android 10, 4 Гб.'},s:[['ОС','Android 10'],['Память','4 Гб'],['Сканер','Встроенный']]},
+  {id:30,cat:'consumables',e:'🗒️',b:'',n:{ru:'Этикетки 58×40/58×30/43×25/30×20 мм',kz:'Жапсырмалар 58×40/58×30/43×25/30×20 мм'},p:'от 600 тг',o:'',d:{ru:'Штучно: 950 тг. Блок: 750 тг. Коробка: 600 тг.',kz:'Дана: 950 тг. Блок: 750 тг. Қорап: 600 тг.'},s:[['Штучно','950 тг'],['Блок','750 тг'],['Коробка','600 тг']]},
+  {id:31,cat:'consumables',e:'🗒️',b:'',n:{ru:'Этикетки 80×60 мм',kz:'Жапсырмалар 80×60 мм'},p:'от 600 тг',o:'',d:{ru:'Штучно: 950 тг. Блок: 750 тг. Коробка: 600 тг.',kz:'Дана: 950 тг. Блок: 750 тг. Қорап: 600 тг.'},s:[['Штучно','950 тг'],['Блок','750 тг'],['Коробка','600 тг']]},
+  {id:32,cat:'consumables',e:'🗒️',b:'',n:{ru:'Чек-лента 58×32 мм',kz:'Чек таспасы 58×32 мм'},p:'от 150 тг',o:'',d:{ru:'Штучно: 300 тг. Блок: 200 тг. Коробка: 150 тг.',kz:'Дана: 300 тг. Блок: 200 тг. Қорап: 150 тг.'},s:[['Штучно','300 тг'],['Блок','200 тг'],['Коробка','150 тг']]},
+  {id:33,cat:'consumables',e:'🔌',b:'',n:{ru:'LAN кабель для весов (за метр)',kz:'Таразыға LAN кабель (метр)'},p:'250 тг/м',o:'',d:{ru:'LAN кабель для подключения торговых весов. Цена за 1 метр.',kz:'Сауда таразысына LAN кабель. 1 метр бағасы.'},s:[['Цена','250 тг / метр']]},
+  {id:34,cat:'consumables',e:'🔌',b:'sale',n:{ru:'Хаб на 5 портов',kz:'5 портты хаб'},p:'7 500 тг',o:'8 500 тг',d:{ru:'Сетевой хаб на 5 портов.',kz:'5 портты желілік хаб.'},s:[['Порты','5']]},
+  {id:35,cat:'consumables',e:'🔌',b:'sale',n:{ru:'Хаб на 8 портов',kz:'8 портты хаб'},p:'15 000 тг',o:'18 000 тг',d:{ru:'Сетевой хаб на 8 портов.',kz:'8 портты желілік хаб.'},s:[['Порты','8']]}
+];
+
+var badgeLbl={hit:{ru:'Хит',kz:'Хит'},new:{ru:'Новый',kz:'Жаңа'},sale:{ru:'Акция',kz:'Акция'},ref:{ru:'Уценка',kz:'Баға төмен'},kaspi:{ru:'Kaspi',kz:'Kaspi'}};
+
+var i18n={
+  ru:{catalog:'Каталог',items:'товаров',empty:'Ничего не найдено',back1:'← Назад',back2:'← К товару',specs:'Характеристики',orderBtn:'Оставить заявку',nameL:'Ваше имя *',phoneL:'Телефон *',commentL:'Комментарий',submitL:'Отправить заявку',successT:'Заявка отправлена!',successS:'Наш менеджер свяжется с вами в течение 30 минут',goHome:'Вернуться в каталог',navCat:'Каталог',navAbout:'О нас',bannerTag:'РАССРОЧКА 0-0-12 / 0-0-24',bannerTitle:'Кассовое оборудование для бизнеса в Казахстане',bannerSub:'Доставка по всему Казахстану • Установка • Обучение',aboutText:'Профессиональное кассовое оборудование. Установка программы — 30 000 тг (настройка, обучение персонала, техподдержка). Рассрочка Kaspi 0-0-12 / 0-0-24.',address:'ул. Бейбітшілік 24А',install:'Установка программы — 30 000 тг',startDesc:'Для растущих магазинов',stdDesc:'Полная автоматизация магазина',unoDesc:'Система для ресторанов и кафе',month1:'1 месяц',month3:'3 месяца',month6:'6 месяцев',save1:'Сэкономь 20%',save2:'Сэкономь 25%',warehouse:'Склад',calc:'Калькуляция',tarif:'Тарификация',waiter:'Мобильный официант',placeholder:'Поиск оборудования...'},
+  kz:{catalog:'Каталог',items:'тауар',empty:'Ештеңе табылмады',back1:'← Артқа',back2:'← Тауарға',specs:'Сипаттамалары',orderBtn:'Өтініш қалдыру',nameL:'Атыңыз *',phoneL:'Телефон *',commentL:'Түсініктеме',submitL:'Өтінімді жіберу',successT:'Өтініш жіберілді!',successS:'Біздің менеджер 30 минут ішінде сізбен хабарласады',goHome:'Каталогқа оралу',navCat:'Каталог',navAbout:'Біз туралы',bannerTag:'БӨЛІП ТӨЛЕУ 0-0-12 / 0-0-24',bannerTitle:'Қазақстандағы бизнес үшін кассалық жабдықтар',bannerSub:'Қазақстан бойынша жеткізу • Орнату • Оқыту',aboutText:'Кәсіби кассалық жабдықтар. Бағдарламаны орнату — 30 000 тг (баптау, персоналды оқыту, техқолдау). Kaspi бөліп төлеу 0-0-12 / 0-0-24.',address:'Бейбітшілік к-сі 24А',install:'Бағдарламаны орнату — 30 000 тг',startDesc:'Өсіп келе жатқан дүкендер үшін',stdDesc:'Дүкенді толық автоматтандыру',unoDesc:'Мейрамхана және кафе жүйесі',month1:'1 ай',month3:'3 ай',month6:'6 ай',save1:'20% үнемдеу',save2:'25% үнемдеу',warehouse:'Қойма',calc:'Калькуляция',tarif:'Тарификация',waiter:'Мобильді официант',placeholder:'Жабдық іздеу...'}
+};
+
+function t(k){return i18n[lang][k]||'';}
+
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active');});
+  event.target.classList.add('active');
+  applyI18n();
+  render();
+}
+
+function applyI18n(){
+  var m=i18n[lang];
+  document.getElementById('lblCatalog').textContent=m.catalog;
+  document.getElementById('lblEmpty').textContent=m.empty;
+  document.getElementById('lblBack1').textContent=m.back1;
+  document.getElementById('lblBack2').textContent=m.back2;
+  document.getElementById('lblSpecs').textContent=m.specs;
+  document.getElementById('lblOrderBtn').textContent=m.orderBtn;
+  document.getElementById('lblName').textContent=m.nameL;
+  document.getElementById('lblPhone').textContent=m.phoneL;
+  document.getElementById('lblComment').textContent=m.commentL;
+  document.getElementById('lblSubmit').textContent=m.submitL;
+  document.getElementById('lblSuccessTitle').textContent=m.successT;
+  document.getElementById('lblSuccessSub').textContent=m.successS;
+  document.getElementById('lblGoHome').textContent=m.goHome;
+  document.getElementById('lblNavCat').textContent=m.navCat;
+  document.getElementById('lblNavAbout').textContent=m.navAbout;
+  document.getElementById('bannerTag').textContent=m.bannerTag;
+  document.getElementById('bannerTitle').textContent=m.bannerTitle;
+  document.getElementById('bannerSub').textContent=m.bannerSub;
+  document.getElementById('lblAboutText').textContent=m.aboutText;
+  document.getElementById('lblAddress').textContent=m.address;
+  document.getElementById('lblInstall').textContent=m.install;
+  document.getElementById('lblStartDesc').textContent=m.startDesc;
+  document.getElementById('lblStdDesc').textContent=m.stdDesc;
+  document.getElementById('lblUnoDesc').textContent=m.unoDesc;
+  document.getElementById('lblMonth1').textContent=m.month1;
+  document.getElementById('lblMonth2').textContent=m.month1;
+  document.getElementById('lblMonth3').textContent=m.month3;
+  document.getElementById('lblMonth6').textContent=m.month6;
+  document.getElementById('lblSave1').textContent=m.save1;
+  document.getElementById('lblSave2').textContent=m.save2;
+  document.getElementById('lblWarehouse').textContent=m.warehouse;
+  document.getElementById('lblCalc').textContent=m.calc;
+  document.getElementById('lblTarif').textContent=m.tarif;
+  document.getElementById('lblWaiter').textContent=m.waiter;
+  document.getElementById('searchInput').placeholder=m.placeholder;
+}
+
+function setCat(c,el){
+  cat=c;
+  document.querySelectorAll('.cat-chip').forEach(function(x){x.classList.remove('active');});
+  el.classList.add('active');
+  render();
+}
+
+function doSearch(){q=document.getElementById('searchInput').value.toLowerCase();render();}
+
+function getFiltered(){
+  return products.filter(function(p){
+    return (cat==='all'||p.cat===cat)&&(!q||p.n[lang].toLowerCase().includes(q));
+  });
+}
+
+function render(){
+  var list=getFiltered();
+  var grid=document.getElementById('productsGrid');
+  var empty=document.getElementById('emptyState');
+  document.getElementById('productCount').textContent=list.length+' '+t('items');
+  if(!list.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=list.map(function(p){
+    var badge=p.b?'<div class="product-badge badge-'+p.b+'">'+(badgeLbl[p.b]?badgeLbl[p.b][lang]:p.b)+'</div>':'';
+    var old=p.o?'<span class="price-old">'+p.o+'</span>':'';
+    return '<div class="product-card" onclick="openDetail('+p.id+')">'
+      +badge
+      +'<div class="product-img">'+p.e+'</div>'
+      +'<div class="product-body">'
+      +'<div class="product-cat">'+catLabel[lang][p.cat]+'</div>'
+      +'<div class="product-name">'+p.n[lang]+'</div>'
+      +'<div class="product-prices"><span class="price-main">'+p.p+'</span>'+old+'</div>'
+      +'<button class="order-btn" onclick="event.stopPropagation();quickOrder('+p.id+')">'+t('orderBtn')+'</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function openDetail(id){
+  curProduct=products.find(function(p){return p.id===id;});
+  document.getElementById('dEmoji').textContent=curProduct.e;
+  document.getElementById('dCat').textContent=catLabel[lang][curProduct.cat];
+  document.getElementById('dName').textContent=curProduct.n[lang];
+  document.getElementById('dPrice').textContent=curProduct.p;
+  document.getElementById('dOld').textContent=curProduct.o||'';
+  document.getElementById('dDesc').textContent=curProduct.d?curProduct.d[lang]:'';
+  document.getElementById('dSpecs').innerHTML=curProduct.s.map(function(r){
+    return '<div class="spec-row"><span class="spec-key">'+r[0]+'</span><span class="spec-val">'+r[1]+'</span></div>';
+  }).join('');
+  showView('viewDetail');
+}
+
+function quickOrder(id){openDetail(id);setTimeout(openForm,10);}
+
+function openForm(){
+  document.getElementById('formMini').innerHTML=
+    '<span class="form-mini-emoji">'+curProduct.e+'</span>'
+    +'<div><div class="form-mini-name">'+curProduct.n[lang]+'</div>'
+    +'<div class="form-mini-price">'+curProduct.p+'</div></div>';
+  showView('viewForm');
+}
+
+function submitForm(){
+  var nm=document.getElementById('fName').value.trim();
+  var ph=document.getElementById('fPhone').value.trim();
+  if(!nm||!ph){alert(lang==='ru'?'Заполните имя и телефон':'Аты мен телефонды толтырыңыз');return;}
+  if(window.Telegram&&window.Telegram.WebApp){
+    window.Telegram.WebApp.sendData(JSON.stringify({product:curProduct.n[lang],price:curProduct.p,name:nm,phone:ph,comment:document.getElementById('fComment').value}));
+  }
+  showView('viewSuccess');
+}
+
+function goHome(){showView('viewMain');navTo('viewMain','navCat');}
+
+function navTo(vid,nid){
+  showView(vid);
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  document.getElementById(nid).classList.add('active');
+  var sw=document.getElementById('searchWrap'),cw=document.getElementById('catsWrap');
+  if(vid==='viewMain'){sw.style.display='';cw.style.display='';}
+  else{sw.style.display='none';cw.style.display='none';}
+}
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+render();
+</script>
+</body>
+</html>
